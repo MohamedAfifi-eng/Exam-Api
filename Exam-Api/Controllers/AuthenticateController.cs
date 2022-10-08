@@ -29,7 +29,7 @@ namespace Exam_Api.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            ApplicationUser user = await userManager.FindByNameAsync(model.Username);
+            ApplicationUser user = await userManager.FindByEmailAsync(model.Email);
             if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
             {
                 IList<string> userRoles = await userManager.GetRolesAsync(user);
