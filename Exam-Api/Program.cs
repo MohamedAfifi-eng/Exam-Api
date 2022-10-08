@@ -3,15 +3,25 @@ using Exam_Api.Repos;
 using Exam_Api.Repos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using System.Text;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 string cors = "cors";
 // Add services to the container.
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    var jsonInputFormatter = options.InputFormatters
+        .OfType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonInputFormatter>()
+        .Single();
+    jsonInputFormatter.SupportedMediaTypes.Add("multipart/form-data");
+    jsonInputFormatter.SupportedMediaTypes.Add("application/csp-report");
+    
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

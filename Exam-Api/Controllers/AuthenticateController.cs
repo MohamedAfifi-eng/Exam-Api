@@ -74,7 +74,7 @@ namespace Exam_Api.Controllers
             {
                 return BadRequest(model);
             }
-            ApplicationUser userExists = await userManager.FindByNameAsync(model.Username);
+            ApplicationUser userExists = await userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
@@ -82,7 +82,7 @@ namespace Exam_Api.Controllers
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Username,
+                UserName = model.Email,
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = false,
                 FullName = model.FullName

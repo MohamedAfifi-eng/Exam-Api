@@ -106,5 +106,10 @@ namespace Exam_Api.Repos
             await _db.SaveChangesAsync();
             return entity;
         }
+        public Question? GetQuestionincloudExam(int questionId)
+        {
+            return GetAll().AsNoTracking().Where(x => x.id == questionId).Include(x => x.exam).FirstOrDefault();
+        }
+
     }
 }
