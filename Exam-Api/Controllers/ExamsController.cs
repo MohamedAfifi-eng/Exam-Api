@@ -10,7 +10,7 @@ namespace Exam_Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ExamsController : ControllerBase
     {
         private readonly IExamService _examService;
@@ -34,6 +34,13 @@ namespace Exam_Api.Controllers
             string id = _userManager.GetUserId(User);
             List<Exam> model = _examService.GetExamsForSpecificUser(id).ToList();
             IEnumerable<ExamDTO> result = _mapper.Map<IEnumerable<ExamDTO>>(model);
+            return Ok(result);
+        }
+        [HttpGet("getexam")]
+        public IActionResult GetExams(int id)
+        {
+            Exam? model = _examService.Find(id);
+            ExamDTO result = _mapper.Map<ExamDTO>(model);
             return Ok(result);
         }
 

@@ -71,7 +71,6 @@ namespace Exam_Api.Controllers
 
         // POST api/<QuestionsController>
         [HttpPost]
-
         public IActionResult Post( QuestionDTO value)
         {
 
@@ -91,23 +90,6 @@ namespace Exam_Api.Controllers
                 return Forbid();
             }
             var entity= _mapper.Map<Question>(value);
-            var img= Request.Form.Files.FirstOrDefault();
-            if (img != null)
-            {
-                string path = $"wwwroot/{entity.examId}/{Guid.NewGuid().ToString()}";
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    if (AcceptedFileExtentions.Contains(Path.GetExtension(img.FileName).ToLower())
-                        && img.Length < 5000
-                        )
-                    {
-                        img.CopyTo(stream);
-                        entity.imgPath = path;
-                    }
-
-                }
-            }
-
             _questionService.Create(entity);
             value = _mapper.Map<QuestionDTO>(entity);
             return Ok(value);
@@ -154,5 +136,27 @@ namespace Exam_Api.Controllers
             Boolean result = _questionService.Remove(id);
             return result ? NoContent() : UnprocessableEntity();
         }
+       // [HttpPost("updateimg/{id}")]
+        //public  IActionResult updateimg(IFormFile img ,int id) 
+        //{
+        //    if (img != null)
+        //    {
+        //        string path = $"wwwroot/{id}/{Guid.NewGuid().ToString()}";
+        //        using (var stream = new FileStream(path, FileMode.Create))
+        //        {
+        //            if (AcceptedFileExtentions.Contains(Path.GetExtension(img.FileName).ToLower())
+        //                && img.Length < 5000
+        //                )
+        //            {
+        //                img.CopyTo(stream);
+        //                entity.imgPath = path;
+        //            }
+
+        //        }
+        //    }
+
+
+        //    return Ok(new {imgname=img.FileName,questionID=id});
+        //}
     }
 }

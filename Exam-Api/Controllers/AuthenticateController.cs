@@ -27,10 +27,10 @@ namespace Exam_Api.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        public async Task<IActionResult> Login(LoginModel model)
         {
             ApplicationUser user = await userManager.FindByEmailAsync(model.Email);
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+            if (user != null && await userManager.CheckPasswordAsync(user, model. Password))
             {
                 IList<string> userRoles = await userManager.GetRolesAsync(user);
 
@@ -91,7 +91,9 @@ namespace Exam_Api.Controllers
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+            LoginModel loginModel = new LoginModel() { Email = model.Email, Password = model.Password };
+            return RedirectToAction(nameof(Login), loginModel);
+           // return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
     }
