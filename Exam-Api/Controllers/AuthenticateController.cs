@@ -92,7 +92,8 @@ namespace Exam_Api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
             LoginModel loginModel = new LoginModel() { Email = model.Email, Password = model.Password };
-            return RedirectToAction(nameof(Login), loginModel);
+            return await Login(loginModel);
+                
            // return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
