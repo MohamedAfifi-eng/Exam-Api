@@ -57,13 +57,14 @@ namespace Exam_Api.Controllers
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
 
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
-                });
+                //return Ok(new
+                //{
+                //    token = new JwtSecurityTokenHandler().WriteToken(token),
+                //    expiration = token.ValidTo
+                //});
+                return Ok(new ResponseDTO<string>() { Message = "You Logged in successfully", Data= new JwtSecurityTokenHandler().WriteToken(token) });
             }
-            return Unauthorized();
+            return Unauthorized(new ResponseDTO<Boolean>() { Message = "Wrong User or Password !" });
         }
 
         [HttpPost]
@@ -72,11 +73,11 @@ namespace Exam_Api.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(model);
+                return BadRequest(new ResponseDTO<RegisterModel>() { Message="You Enterd Wrong data format",Data= model });
             }
             ApplicationUser userExists = await userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO<RegisterModel>() { Message = "User is Exist", Data = model });
 
             ApplicationUser user = new ApplicationUser()
             {
@@ -93,8 +94,6 @@ namespace Exam_Api.Controllers
 
             LoginModel loginModel = new LoginModel() { Email = model.Email, Password = model.Password };
             return await Login(loginModel);
-                
-           // return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
     }
