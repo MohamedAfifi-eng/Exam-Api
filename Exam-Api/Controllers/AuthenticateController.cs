@@ -77,7 +77,8 @@ namespace Exam_Api.Controllers
             }
             ApplicationUser userExists = await userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO<RegisterModel>() { Message = "User is Exist", Data = model });
+                //return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO<RegisterModel>() { Message = "User is Exist", Data = model });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO<RegisterModel>() { errorMessage = "User is Exist", Data = model });
 
             ApplicationUser user = new ApplicationUser()
             {

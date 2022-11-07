@@ -10,7 +10,7 @@ namespace Exam_Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ExamsController : ControllerBase
     {
         private readonly IExamService _examService;
@@ -56,6 +56,7 @@ namespace Exam_Api.Controllers
             string user = _userManager.GetUserId(User);
             Exam model = _mapper.Map<Exam>(dto);
             model.createrId_FK = user;
+            model.id = 0;
             _examService.Create(model);
             return Ok(new ResponseDTO<ExamDTO>() { Message="Exam Created Succesfully ",Data=_mapper.Map<ExamDTO>(model)});
         }
