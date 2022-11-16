@@ -4,7 +4,6 @@ using Exam_Api.Model;
 using Exam_Api.Repos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NuGet.Protocol;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -38,15 +37,21 @@ namespace Exam_Api.Controllers
             Exam? exam = _examService.Find(examid);
             if (exam == null)
             {
-                return NotFound();
+                ResponseDTO<bool> resp = new ResponseDTO<bool>() { Message = "Exam Not Found" };
+                return NotFound(resp);
             }
             string userid = _userManager.GetUserId(User);
             if (exam.createrId_FK != userid)
             {
-                return Forbid();
+                ResponseDTO<bool> resp = new ResponseDTO<bool>() { Message = "You Have Not Permission to Access this Resources" };
+                return StatusCode(StatusCodes.Status403Forbidden, resp);
             }
-            List<QuestionDTO> model = _mapper.Map<List<QuestionDTO>>(_questionService.GetExamQuestions(examid).ToList());
-            return Ok(model);
+            else
+            {
+                List<QuestionDTO> model = _mapper.Map<List<QuestionDTO>>(_questionService.GetExamQuestions(examid).ToList());
+                ResponseDTO<List<QuestionDTO>> resp = new ResponseDTO<List<QuestionDTO>>() { Data = model };
+                return Ok(model);
+            }
         }
 
         // GET api/<QuestionsController>/5
@@ -54,69 +59,76 @@ namespace Exam_Api.Controllers
         public IActionResult Get(int id)
         {
             Question? question = _questionService.GetQuestionincloudExam(id);
+            ResponseDTO<QuestionDTO> resp = new ResponseDTO<QuestionDTO>();
             if (question == null)
             {
-                return NotFound();
+                resp.Message = "Question Not Found";
+                return NotFound(resp);
             }
 
             string userid = _userManager.GetUserId(User);
             if (question.exam?.createrId_FK != userid)
             {
-                return Forbid();
+                 resp . Message = "You Have Not Permission to Access this Resources" ;
+
+                return StatusCode(StatusCodes.Status403Forbidden, resp);
             }
             QuestionDTO model = _mapper.Map<QuestionDTO>(question);
-
-            return Ok(model);
+            resp.Data = model;
+            return Ok(resp);
         }
 
         // POST api/<QuestionsController>
         [HttpPost]
-        public IActionResult Post( QuestionDTO value)
+        public IActionResult Post(QuestionDTO value)
         {
-
+            ResponseDTO<QuestionDTO> resp = new ResponseDTO<QuestionDTO>();
             if (!ModelState.IsValid)
             {
-                return BadRequest(new {msh="modelstat is not valid"});
+                return BadRequest(resp.Data=value);
             }
 
-            var exam= _examService.Find(value.examId);
-            if (exam==null)
+            Exam? exam = _examService.Find(value.examId);
+            if (exam == null)
             {
-                return BadRequest(new { msh = "exam not found" });
+                return NotFound(resp.Message= "exam not found" );
             }
-            var user = _userManager.GetUserId(User);
-            if (exam.createrId_FK!= user)
+            string user = _userManager.GetUserId(User);
+            if (exam.createrId_FK != user)
             {
-                return Forbid();
+                return StatusCode(StatusCodes.Status403Forbidden, resp.Message = "You are not the owner of this Exam");
             }
-            var entity= _mapper.Map<Question>(value);
+            Question entity = _mapper.Map<Question>(value);
             _questionService.Create(entity);
             value = _mapper.Map<QuestionDTO>(entity);
-            return Ok(value);
+            resp.Data = value;
+            return Ok(resp);
         }
 
 
         // PUT api/<QuestionsController>/5
         [HttpPut("{id}")]
-        public IActionResult Put([FromRoute]int id, [FromBody] QuestionDTO value)
+        public IActionResult Put([FromRoute] int id, [FromBody] QuestionDTO value)
         {
-            if (id!=value.id)
+            var resp = new ResponseDTO<QuestionDTO>();
+            if (id != value.id)
             {
-                return BadRequest();
+                return BadRequest(resp.Message="Please Check The Data");
             }
-            var question= _questionService.GetQuestionincloudExam(id);
-            if (question==null)
+            Question? question = _questionService.GetQuestionincloudExam(id);
+            if (question == null)
             {
-                return NotFound();
+                return NotFound(resp.Message = "Question Not Found");
             }
-            var userid = _userManager.GetUserId(User);
-            if (question.exam?.createrId_FK!=userid)
+            string userid = _userManager.GetUserId(User);
+            if (question.exam?.createrId_FK != userid)
             {
-                return Forbid();
+                return StatusCode(StatusCodes.Status403Forbidden, resp.Message = "You are not the Owner Of this Exam");
             }
-            var entity = _mapper.Map<Question>(value);
+            Question entity = _mapper.Map<Question>(value);
             _questionService.Update(entity);
-            return Ok(value);
+            resp.Data = value;
+            return Ok(resp);
         }
 
         // DELETE api/<QuestionsController>/5
@@ -124,19 +136,20 @@ namespace Exam_Api.Controllers
         public IActionResult Delete(int id)
         {
             Question? question = _questionService.GetQuestionincloudExam(id);
+            var resp =new ResponseDTO<Boolean>();
             if (question == null)
             {
-                return NotFound();
+                return NotFound(resp.Message="Question Not Found");
             }
             string userid = _userManager.GetUserId(User);
             if (question.exam?.createrId_FK != userid)
             {
-                return Forbid();
+                return StatusCode(StatusCodes.Status403Forbidden, resp.Message = "You are not the owner of this exam");
             }
             Boolean result = _questionService.Remove(id);
-            return result ? NoContent() : UnprocessableEntity();
+            return result ? Ok(resp.Data=true) : StatusCode(StatusCodes.Status500InternalServerError,resp.Message="internal Error try again later or call the admin");
         }
-       // [HttpPost("updateimg/{id}")]
+        // [HttpPost("updateimg/{id}")]
         //public  IActionResult updateimg(IFormFile img ,int id) 
         //{
         //    if (img != null)
